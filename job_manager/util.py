@@ -1,0 +1,1 @@
+def check_manadatory_params

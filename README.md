@@ -10,7 +10,7 @@ API can do anything.
 ### Dependencies
 
 ```sh
-apt install python3 apach2 libapache2-mod-wsgi-py3 python3-urllib3 python3-requests \
+apt install python3 apache2 libapache2-mod-wsgi-py3 python3-urllib3 python3-requests \
   python3-psycopg2 python3-pyshp postgresql python3-jinja2 python3-markdown
 ```
 
@@ -45,7 +45,7 @@ CREATE TABLE jobs (
   finished_at timestamp without time zone,
   download_path text
 );
-GRANT * ON jobs TO "www-data";
+GRANT ALL ON jobs TO "www-data";
 ```
 
 ### Checking out the source code and write a configuration file

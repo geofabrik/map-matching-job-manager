@@ -37,13 +37,19 @@ Responses by the API are JSON documents like the following.
 The objects in the `jobs` array have following properties:
 
 * `created_at`: date and time of creation of the job
-* `started_at`: date and time when the processing started (null for queued and cancelled jobs)
-* `finished_at`: date and time when the processing finished (null for queued, cancelled and running jobs, failure time for failed jobs)
+* `started_at`: date and time when the processing started (null for queued and
+  cancelled jobs)
+* `finished_at`: date and time when the processing finished (null for queued,
+  cancelled and running jobs, failure time for failed jobs)
 * `id`: ID of the job (numeric)
-* `name`: name of the job, characters other than `[-a-zA-Z,_0-9]` have been replaced by `_`
-* `status`: job status, possible values are `incomplete`, `queued`, `cancelled`, `running`, `failed`, `finished`
-* `query_params`: query string of the POST request, will be forwarded to the map matching API (with minor changes)
-* `download_path`: path to download the result from (you have to append hostname and port in front of it)
+* `name`: name of the job, characters other than `[-a-zA-Z,_0-9]` have been
+  replaced by `_`
+* `status`: job status, possible values are `incomplete`, `queued`,
+  `cancelled`, `running`, `failed`, `finished`
+* `query_params`: query string of the POST request, will be forwarded to the
+  map matching API (with minor changes)
+* `download_path`: path to download the result from (you have to append
+  hostname and port in front of it)
 
 ## Job status
 
@@ -65,10 +71,14 @@ Input:
 * HTTP requests: POST
 * Query parameters:
     * `name`: name of the job
-    * `type`: `csv` for CSV output, `gpx` for GPX output, `JSON` for JSON output and `shp` for a zipped ESRI Shapefile. This parameter is forwarded to the map matching API. If the value is `shp`, `csv` will be forwarded and converted into a shape file by the job manager.
+    * `type`: `csv` for CSV output, `gpx` for GPX output, `JSON` for JSON
+      output and `shp` for a zipped ESRI Shapefile. This parameter is forwarded
+      to the map matching API. If the value is `shp`, `csv` will be forwarded and
+      converted into a shape file by the job manager.
     * All other query parameters are forwarded to the map matching API.
 * The request must have a correct `Content-Length` header.
-* The request must have a `Content-Type` header. Permitted values are `application/gpx+xml` and `text/csv`.
+* The request must have a `Content-Type` header. Permitted values are
+  `application/gpx+xml` and `text/csv`.
 
 Output: same as the job status call but only the information about the new job is provided
 
@@ -84,11 +94,14 @@ Input:
 
 * API endpoint: `/job`
 * HTTP requests: DELETE
-* If your client HTTP stack does not support the DELETE request, you can fake a DELETE request by setting the HTTP header `X_HTTP_METHOD_OVERRIDE` to `DELETE`.
+* If your client HTTP stack does not support the DELETE request, you can fake a
+  DELETE request by setting the HTTP header `X_HTTP_METHOD_OVERRIDE` to
+  `DELETE`.
 * Query parameters:
     * `id`: ID of the job to be deleted
 
-Output: same as the job status call but only the information about the cancelled job is provided
+Output: same as the job status call but only the information about the
+cancelled job is provided
 
 Errors:
 

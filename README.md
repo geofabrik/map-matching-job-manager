@@ -1,7 +1,9 @@
-# Map Matching API and Frontend
+# Job Management for Map Matching – API and Frontend
 
-The map matching API is a WSGI Python web application offering a basic job management to interact with the
-map matching API of the [railway routing](https://github.com/geofabrik/railway_routing) project by Geofabrik.
+This repository contains a basic job management API (including a frontend) for the map matching API
+of the of the [railway routing](https://github.com/geofabrik/railway_routing) project by Geofabrik.
+Basic means that it does not have any authentication or rate limiting. Everyone who can access the
+API can do anything.
 
 ## Setup
 

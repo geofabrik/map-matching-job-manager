@@ -237,3 +237,21 @@ div.errorMessage {
 div.okMessage {
     background-color: #a9fee6;
 }
+
+div.header {
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #fcb100;
+}
+
+div.header > img.logo {
+    margin-right: 20px;
+}
+
+div.header > h1 {
+    flex-grow: 1;
+    padding-bottom: 5px;
+    border-width: 0px;
+}
+

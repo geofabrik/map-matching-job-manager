@@ -1,41 +1,5 @@
 "use strict";
 
-// INFO: Following variables have be modified when this page is deployed on a server
-var start_latitude = 48.86; // initial latitude of the center of the map
-var start_longitude = 2.39; // initial longitude of the center of the map
-var start_zoom = 10; // initial zoom level
-var max_zoom = 19; // maximum zoom level the tile server offers
-// End of the variables which might be modified if deployed on a server
-
-// define base maps
-var osmAttribution = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
-var baseLayers = {
-    'OSM Carto': L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, imagery CC-BY-SA'}),
-    'OSM Carto DE': L.tileLayer('//{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png', {maxZoom: 19, attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, imagery CC-BY-SA'}),
-    'SNCFOSM': L.tileLayer('https://carto.sncf.fr/tiles/osm/{z}/{x}/{y}.png', {attribution: osmAttribution}),
-    'SNCFOSMFR': L.tileLayer('https://carto.sncf.fr/tiles/osmfr/{z}/{x}/{y}.png', {attribution: osmAttribution}),
-    'SNCF': L.tileLayer('https://carto.sncf.fr/tiles/sncf/{z}/{x}/{y}.png', {attribution: osmAttribution}),
-    'SNCF_FRANCE': L.tileLayer('https://carto.sncf.fr/tiles/sncf-france/{z}/{x}/{y}.png', {attribution: osmAttribution}),
-};
-var map = null;
-
-// set current layer, by default the layer with the local tiles
-var currentBaseLayerName = 'SNCFOSM';
-
-
-// functions executed if the layer is changed or the map moved
-function update_url(newBaseLayerName='') {
-    var newName = newBaseLayerName;
-    if (newBaseLayerName === '') {
-        newName = currentBaseLayerName;
-    }
-    var origin = location.origin;
-    var pathname = location.pathname;
-    var newurl = origin + pathname + "#" + newName + '/' + map.getZoom() + "/" + map.getCenter().lat.toFixed(6) + "/" +map.getCenter().lng.toFixed(6);
-    history.replaceState('data to be passed', document.title, newurl);
-}
-
-
 // load available flag encoders
 function loadInfos() {
     var xhr = new XMLHttpRequest();
@@ -64,55 +28,20 @@ function loadInfos() {
     xhr.send();
 }
 
-function initMap() {
-    // define overlay
-    var gpxLayer = null;
-    var gpxDataStr = '';
-
-    // get layer and location from anchor part of the URL if there is any
-    var anchor = location.hash.substr(1);
-    if (anchor != "") {
-        var elements = anchor.split("/");
-        if (elements.length == 4) {
-            currentBaseLayerName = decodeURIComponent(elements[0]);
-            start_zoom = elements[1];
-            start_latitude = elements[2];
-            start_longitude = elements[3];
-        }
-    }
-
-    map = L.map('map', {
-        center: [start_latitude, start_longitude],
-        zoom: start_zoom,
-        layers: [baseLayers[currentBaseLayerName]]
-    });
-    // layer control
-    var layerControl = L.control.layers(baseLayers, {});
-    layerControl.addTo(map);
-
-    // event is fired if the base layer of the map changes
-    map.on('baselayerchange', function(e) {
-        currentBaseLayerName = e.name;
-        update_url(e.name);
-    });
-
-    // change URL in address bar if the map is moved
-     map.on('move', function(e) {
-         update_url();
-    });
-}
-
-function showRequestSuccess(method, call, response) {
+function showRequestResult(success, method, call, response) {
     var msgDiv = document.getElementById('message');
     msgDiv.classList.remove('hideMessage');
     msgDiv.classList.remove('okMessage');
     msgDiv.classList.remove('errorMessage');
-    var obj = JSON.parse(response);
-    if (method === 'POST' && call === 'job') {
-        msgDiv.innerText = 'Job ' + obj[0]["name"] + ' successfully created.';
+    var obj = response;
+    if (success && method === 'POST' && call === 'job') {
+        msgDiv.innerText = 'Job ' + obj["jobs"][0]["name"] + ' successfully created.';
         msgDiv.classList.add('okMessage');
-    } else if (method === 'POST' && call === 'job') {
-        msgDiv.innerText = 'ERROR: Job ' + obj[0]["name"] + ' could not be created.';
+    } else if (success && method === 'DELETE' && call === 'job') {
+        msgDiv.innerText = 'Job ' + obj["jobs"][0]["name"] + ' successfully cancelled.';
+        msgDiv.classList.add('okMessage');
+    } else if (!success) {
+        msgDiv.innerText = 'ERROR: ' + obj["message"];
         msgDiv.classList.add('errorMessage');
     }
 }
@@ -121,8 +50,8 @@ function sendJobPostRequest(inputData) {
     var inputFormat = document.getElementById('inputFormat').value;
     var xhr = new XMLHttpRequest();
     var url = "/job?";
-    url += "&name=" + encodeURIComponent(document.getElementById('').value);
-    url += "&gps_accuracy=" + document.getElementById('gpsAccuracy').value;
+    url += "&name=" + encodeURIComponent(document.getElementById('jobName').value);
+    url += "&gps_accuracy=" + document.getElementById('gps_accuracy').value;
     url += "&max_visited_nodes=" + document.getElementById('maxNodes').value;
     url += "&vehicle=" + encodeURIComponent(document.getElementById('vehicle').value);
     url += "&fill_gaps=" + document.getElementById('fillGaps').checked;
@@ -137,10 +66,10 @@ function sendJobPostRequest(inputData) {
     xhr.responseType = "json";
     xhr.onreadystatechange = function() {
         if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
-            showRequestSuccess("POST", "job", xhr.response);
-            loadDataTable();
+            showRequestResult(true, "POST", "job", xhr.response);
+            $('#table-jobs').DataTable().ajax.reload();
         } else if (xhr.readyState == XMLHttpRequest.DONE) {
-            showRequestFailure("POST", "job", xhr.response);
+            showRequestResult(false, "POST", "job", xhr.response);
         }
     };
     xhr.send(inputData);
@@ -157,46 +86,65 @@ function createJob(e) {
     reader.readAsText(f);
 }
 
-function loadDataTable() {
+function cancelJob(e) {
+    var jobId = e.target.getAttribute('data-job-id');
     var xhr = new XMLHttpRequest();
-    var url = "/status";
-    xhr.open('GET', url, true);
-    xhr.responseType = 'json';
+    var url = "/job?id=" + jobId;
+    xhr.open("DELETE", url, true);
+    xhr.responseType = "json";
     xhr.onreadystatechange = function() {
         if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
-            var gJobTable = $('#table-jobs').DataTable({
-                data: xhr.response,
-                columns: [
-                    { data: 'id'},
-                    { data: 'name'},
-                    { data: 'status'},
-                    { data: 'query_params'}
-                ]
-            });
+            showRequestResult(true, "DELETE", "job", xhr.response);
+            $('#table-jobs').DataTable().ajax.reload();
+        } else if (xhr.readyState == XMLHttpRequest.DONE) {
+            showRequestResult(false, "DELETE", "job", xhr.response);
         }
     };
     xhr.send();
+}
 
+function registerCancelButtonEvents() {
+    [].forEach.call(document.getElementsByClassName('cancelButton'), function(e) {
+        e.addEventListener('click', cancelJob);
+    });
+}
 
-//    var gJobTable = $('#table-jobs').DataTable({
-//        ajax: "http://saarland.hatano.geofabrik.de/status",
-//        columns: [
-//            { data: 'id'},
-//            { data: 'name'},
-//            { data: 'status'},
-//            { data: 'query_params'}
-//        ]
-//    });
-//
-//    $('#name')[0].value = new Date(Date.now()).toISOString(); 
+function loadDataTable() {
+    var gJobTable = $('#table-jobs').DataTable({
+        // data source loaded via AJAX
+        ajax: {
+            url: "/status",
+            dataSrc: "jobs"
+        },
+        // column definitions
+        columns: [
+            { data: 'id'},
+            {
+                data: null,
+                render: function(data, type, row) {
+                    if (row.status === 'queued') {
+                        return ' <button id="cancelButtonId' + row.id + '" class="cancelButton" data-job-id="' + row.id + '">Cancel</button>';
+                    }
+                    if (row.status === 'finished') {
+                        return ' <a class="downloadLink" href="' + row.download_path + '" download>Download</a>';
+                    }
+                    return '';
+                },
+                sortable: false
+            },
+            { data: 'name'},
+            { data: 'status'},
+            { data: 'created_at'},
+            { data: 'started_at'},
+            { data: 'finished_at'},
+            { data: 'query_params'}
+        ],
+        "initComplete": registerCancelButtonEvents,
+    });
+    gJobTable.on('draw', registerCancelButtonEvents);
 };
 
-//document.onreadystatechange = () => {
-//    if (document.readyState === 'complete') {
-        loadDataTable();
-        loadInfos();
-        initMap();
-        document.getElementById('createJob').addEventListener('click', createJob);
-//    }
-//};
 
+loadDataTable();
+loadInfos();
+document.getElementById('createJob').addEventListener('click', createJob);

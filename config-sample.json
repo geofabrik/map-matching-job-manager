@@ -1,0 +1,7 @@
+{
+  "api_url": "http://localhost:8989/match",
+  "postgres_connect": "dbname=jobs",
+  "input_directory": "/tmp/jobs/input/",
+  "output_directory": "/tmp/jobs/output/",
+  "download_path_prefix": "/job-manager/download/"
+}

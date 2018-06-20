@@ -1,0 +1,12 @@
+[Unit]
+Description=Railway routing map matching job managment worker
+# Add the unit name of the railway router if it is started by Systemd
+After=syslog.target network.target
+
+[Service]
+User=www-data
+ExceStart=/usr/bin/python3 /srv/job-manager/worker.py -c /srv/job-manager/config.json
+
+[Install]
+WantedBy=multi-user.target
+

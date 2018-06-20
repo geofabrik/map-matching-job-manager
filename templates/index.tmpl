@@ -4,25 +4,20 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
         <meta name="apple-mobile-web-app-capable" content="yes">
-        <title>Railway Map Matching Job Management</title>
-        <!--<link rel="stylesheet" href="js/theme/default/style.css" type="text/css">-->
+        <title>{{ title }}</title>
         <link rel="stylesheet" href="css/style.css" type="text/css">
-        <link rel="stylesheet" href="leaflet/leaflet.css" type="text/css">
-        <!--<link rel="stylesheet" href="css/jquery.dataTables.css" type="text/css">-->
-        <link rel="stylesheet" href="datatables/datatables-1.10.18.css" type="text/css">
-        <script src="leaflet/leaflet.js" type="text/javascript"></script>
+        <link rel="stylesheet" href="datatables/datatables-1.10.18.min.css" type="text/css">
         <script src="js/jquery.min.js" type="text/javascript"></script>
-        <!--<script src="js/jquery.dataTables.min.js" type="text/javascript"></script>-->
-        <script src="datatables/datatables-1.10.18.js" type="text/javascript"></script>
+        <script src="datatables/datatables-1.10.18.min.js" type="text/javascript"></script>
     </head>
     <body>
-        <h1 id="title">Railway Map Matching Job Management</h1>
-        
-            <div id="map" class="smallmap"></div>
-        
-        <!--br/>
-        <button onclick="draw()">Draw</button>
-        <br/-->
+        <div class="header">
+            <img src="img/logo.png" class="logo">
+            <h1 id="title">{{ title }}</h1>
+        </div>
+        {% if content %}
+        {{ content|safe }}
+        {% else %}
         <div id="form">
             <div class="formElement">
                 <label for="vehicle" class="caption">Routing profile</label>
@@ -72,14 +67,22 @@
                 <thead>
                     <tr>
                         <th>Job ID</th>
+                        <th></th>
                         <th>Job Name</th>
                         <th>Status</th>
+                        <th>created</th>
+                        <th>started</th>
+                        <th>finished</th>
                         <th>Query Parameters</th>
                     </tr>
                 </thead>
             </table>
         </div>
+        {% endif %}
+        <p><a href="{{ legal_notice }}">Legal Notice</a> | <a href="{{ privacy }}">Privacy</a> | <a href="api.html">REST API documentation</a></p>
+        {% if content == None %}
         <script src="js/map.js" type="text/javascript"></script>
+        {% endif %}
     </body>
 </html>
 

@@ -1,2 +1,5 @@
 .*.swp
 *.pyc
+config.json
+frontend/index.html
+frontend/api.html

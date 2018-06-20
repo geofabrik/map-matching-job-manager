@@ -4,6 +4,7 @@ class Job:
         self.name = kwargs.get("name")
         self.status = kwargs.get("status")
         self.query_params = kwargs.get("query_params")
-
-    def json_serialize(self):
-        return self.__dict__
+        self.created_at = kwargs.get("created_at", None)
+        self.started_at = kwargs.get("started_at", None)
+        self.finished_at = kwargs.get("finished_at", None)
+        self.download_path = kwargs.get("download_path", None)

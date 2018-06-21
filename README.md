@@ -49,19 +49,36 @@ CREATE TABLE jobs (
 GRANT ALL ON jobs TO "www-data";
 ```
 
-### Checking out the source code and write a configuration file
+### Checking out the source code, write a configuration file, create directories and system user accounts
 
 * Clone this repository, e.g. to `/srv/job-manager/`.
 * Install Apache and mod_wsgi. Ensure that you use the Python3 version of mod_wsgi.
+* Create a user account for the work processing daemon:
+
+```sh
+createuser --disabled-password --group robot
+```
+
 * Create directories to store input files and output files, e.g. `/var/job-manager/input` and
   `/var/www/jobs/output`. These directories must be writeable for the users which runs the Python
-  web application (input directory) and the worker process (output directory).
+  web application (input directory) and the worker process (output directory):
+
+```sh
+mkdir -p /var/job-manager/input/
+chown www-data:robot /var/job-manager/input/
+chmod 775 /var/job-manager/input/
+mkdir -p /var/www/jobs/output
+chown robot /var/www/jobs/output/
+chmod 755 /var/www/jobs/output/
+```
+
 * Create a configuration file called `config.json` by using the sample configuration
   `config-sample.json`. It has to be place in the top level directory of this repository.
 
 ### Build frontend
 
-Run `make` to build the frontend and API documentation. Resulting files will be located at `frontend/`
+Run `make` to build the frontend and API documentation. Resulting files will be located at
+`frontend/`
 
 If you want to beautify the frontend with your logo, place it at `frontend/img/logo.png`.
 
@@ -122,6 +139,17 @@ where Systemd unit files are located, e.g. `/etc/systemd/system/` on Debian:
 cp job-manager-worker.service /etc/systemd/system/
 systemctl daemon-reload
 systemctl start job-manager-worker
+```
+
+### Cleanup cron job
+
+Finished jobs are not deleted from the database and the disk automatically. You have to run a cronjob
+to remove old data. That' what [job_cleanup.py](job_cleanup.py) is intended for. Add following entry to
+the crontab of user robot (`crontab -e -u robot`) to remove jobs older than 48 hours:
+
+```crontab
+# m h dom mon dow user  command
+15 2    * * *   robot   /usr/bin/python3 /srv/job-manager/job_cleanup.py -c /srv/job-manager/config.json -m 48
 ```
 
 ## License

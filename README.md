@@ -38,6 +38,7 @@ Log into the database using `sudo -u postgres psql -d jobs` and run following co
 CREATE TABLE jobs (
   id serial primary key,
   name text,
+  status text,
   input_file text,
   query_params text,
   created_at timestamp without time zone,
@@ -90,7 +91,7 @@ Configure an Apache virtual host (see below):
       Require all granted
   </Directory>
 
-  WSGIDaemonProcess with_psycopg2 processes=2 threads=1 python-path=/home/michael/git/git.geofabrik.de/job-manager/ home=/home/michael/git/git.geofabrik.de/job-manager/
+  WSGIDaemonProcess with_psycopg2 processes=2 threads=1 python-path=/srv/job-manager/ home=/srv/job-manager/
   WSGIScriptAlias /job    /srv/job-manager/application.py
   WSGIScriptAlias /status /srv/job-manager/application.py
   <Location /job>

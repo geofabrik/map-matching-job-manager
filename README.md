@@ -53,10 +53,11 @@ GRANT ALL ON jobs TO "www-data";
 
 * Clone this repository, e.g. to `/srv/job-manager/`.
 * Install Apache and mod_wsgi. Ensure that you use the Python3 version of mod_wsgi.
-* Create a user account for the work processing daemon:
+* Create a user account for the work processing daemon and its PostgreSQL account:
 
 ```sh
-createuser --disabled-password --group robot
+adduser --disabled-password --group robot
+sudo -u postgres createuser robot
 ```
 
 * Create directories to store input files and output files, e.g. `/var/job-manager/input` and

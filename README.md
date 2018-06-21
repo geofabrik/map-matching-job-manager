@@ -20,6 +20,32 @@ Build and install the railway routing enginge, import data, start it. This step 
 own repository. The configuration listed below, assumes that the railway routing API listens on port
 8989.
 
+### Checking out the source code, write a configuration file, create directories and system user accounts
+
+* Clone this repository, e.g. to `/srv/job-manager/`.
+* Install Apache and mod_wsgi. Ensure that you use the Python3 version of mod_wsgi.
+* Create a user account for the work processing daemon:
+
+```sh
+adduser --disabled-password robot
+```
+
+* Create directories to store input files and output files, e.g. `/var/job-manager/input` and
+  `/var/www/jobs/output`. These directories must be writeable for the users which runs the Python
+  web application (input directory) and the worker process (output directory):
+
+```sh
+mkdir -p /var/job-manager/input/
+chown www-data:robot /var/job-manager/input/
+chmod 775 /var/job-manager/input/
+mkdir -p /var/www/jobs/output
+chown robot /var/www/jobs/output/
+chmod 755 /var/www/jobs/output/
+```
+
+* Create a configuration file called `config.json` by using the sample configuration
+  `config-sample.json`. It has to be place in the top level directory of this repository.
+
 ### PostgreSQL
 Create a PostgreSQL database, create the necessary table and grant the necessary permissions to user
 running the web application and the worker process. The PostgreSQL user has to be created if it does
@@ -29,6 +55,7 @@ not exist:
 # Choose the name of the user your web application runs as, this is most likely the user who runs
 # the Apache processes.
 sudo -u postgres createuser www-data
+sudo -u postgres createuser robot
 sudo -u postgres createdb -E utf-8 jobs
 ```
 
@@ -47,34 +74,8 @@ CREATE TABLE jobs (
   download_path text
 );
 GRANT ALL ON jobs TO "www-data";
+GRANT ALL ON jobs TO "robot";
 ```
-
-### Checking out the source code, write a configuration file, create directories and system user accounts
-
-* Clone this repository, e.g. to `/srv/job-manager/`.
-* Install Apache and mod_wsgi. Ensure that you use the Python3 version of mod_wsgi.
-* Create a user account for the work processing daemon and its PostgreSQL account:
-
-```sh
-adduser --disabled-password --group robot
-sudo -u postgres createuser robot
-```
-
-* Create directories to store input files and output files, e.g. `/var/job-manager/input` and
-  `/var/www/jobs/output`. These directories must be writeable for the users which runs the Python
-  web application (input directory) and the worker process (output directory):
-
-```sh
-mkdir -p /var/job-manager/input/
-chown www-data:robot /var/job-manager/input/
-chmod 775 /var/job-manager/input/
-mkdir -p /var/www/jobs/output
-chown robot /var/www/jobs/output/
-chmod 755 /var/www/jobs/output/
-```
-
-* Create a configuration file called `config.json` by using the sample configuration
-  `config-sample.json`. It has to be place in the top level directory of this repository.
 
 ### Build frontend
 

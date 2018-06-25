@@ -75,7 +75,7 @@ class JobManagerAPI:
                 cur.execute("""UPDATE jobs SET status = 'queued' WHERE id = %s""", (new_id,))
                 self.connection.commit()
                 cur.close()
-        job = Job(**{"id": new_id, "name": name, "status": "queued", "query_params": query_params})
+        job = Job(**{"id": new_id, "name": name, "status": "queued", "query_params": query_string})
         job_list = JobList()
         job_list.add(job)
         response = json.dumps(job_list, default=JobList.json_serialize).encode("utf-8")

@@ -80,7 +80,12 @@ GRANT ALL ON jobs TO "robot";
 ### Build frontend
 
 Run `make` to build the frontend and API documentation. Resulting files will be located at
-`frontend/`
+`frontend/`.
+
+The API documentation contains the hostname and path where the API is located. To use the correct
+host name instead of `http://localhost`, call `make URL_PREFX=https://myfancydomain.tld/mma/1` to
+see `https://myfancydomain.tld/mma/status` instead of `http://localhost/status` in the
+documentation.
 
 If you want to beautify the frontend with your logo, place it at `frontend/img/logo.png`.
 

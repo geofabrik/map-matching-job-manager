@@ -9,7 +9,7 @@ ${FRONTEND}/index.html: ${TEMPLATES}/index.tmpl build_frontend.py
 	python3 build_frontend.py -T "Railway routing map matching job management" -l "https://www.geofabrik.de/geofabrik/imprint.html" -p "https://www.geofabrik.de/geofabrik/imprint.html" -t ${TEMPLATES}/index.tmpl > ${FRONTEND}/index.html
 
 ${FRONTEND}/api.html: ${TEMPLATES}/index.tmpl build_frontend.py ${DOCS}/api.md
-	python3 build_frontend.py -T "API documentation of the railway routing map matching job management" -l "https://www.geofabrik.de/geofabrik/imprint.html" -p "https://www.geofabrik.de/geofabrik/imprint.html" -t ${TEMPLATES}/index.tmpl -m ${DOCS}/api.md > ${FRONTEND}/api.html
+	python3 build_frontend.py -u "http://localhost" -T "API documentation of the railway routing map matching job management" -l "https://www.geofabrik.de/geofabrik/imprint.html" -p "https://www.geofabrik.de/geofabrik/imprint.html" -t ${TEMPLATES}/index.tmpl -m ${DOCS}/api.md > ${FRONTEND}/api.html
 
 clean:
 	rm ${FRONTEND}/index.html ${FRONTEND}/api.html

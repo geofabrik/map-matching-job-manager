@@ -74,9 +74,11 @@ def build_shapefile(job, text, output_path):
     return True
 
 
-def process_response(job, params, r):
+def process_response(job, params, r, is_error=False):
     output_format = params.get("type", ["gpx"])[0]
-    if output_format == "shp":
+    if is_error:
+        output_format = "txt"
+    elif output_format == "shp":
         output_format = "zip"
     # save file
     output_file = "{}_{}.{}".format(job.id, JobManagerAPI.sanatize_name(job.name), output_format)
@@ -127,7 +129,7 @@ def run_job(job):
             return process_response(job, params, r)
         else:
             logger.error("Job {} failed with status code {} and error message {}".format(job.id, r.status_code, r.text))
-            save_error(job, r.text)
+            process_response(job, params, r, True)
             return False
     except requests.exceptions.Timeout as err:
         logger.error("Job {} failed: {}".format(job.id, err))
@@ -149,10 +151,13 @@ def process_jobs(tasks):
             logger.exception(err)
             success = False
             reason = err
+        status = "finished"
+        if not success:
+            status = "failed"
         with psycopg2.connect(configuration["postgres_connect"]) as connection:
             with connection.cursor() as cursor:
-                if success and job.download_path is not None:
-                    cursor.execute("UPDATE jobs SET finished_at = current_timestamp, status = 'finished', download_path = %s WHERE id = %s", (job.download_path, job.id))
+                if job.download_path is not None:
+                    cursor.execute("UPDATE jobs SET finished_at = current_timestamp, status = %s, download_path = %s WHERE id = %s", (status, job.download_path, job.id))
                     logger.debug("Processing of job {} successfully completed.".format(job.id))
                 else:
                     cursor.execute("UPDATE jobs SET finished_at = current_timestamp, status = 'failed' WHERE id = %s", (job.id,))

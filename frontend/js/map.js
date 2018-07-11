@@ -128,6 +128,9 @@ function loadDataTable() {
                     if (row.status === 'finished') {
                         return ' <a class="downloadLink" href="' + row.download_path + '" download>Download</a>';
                     }
+                    if (row.status === 'failed') {
+                        return ' <a class="downloadLink" href="' + row.download_path + '" download>Show error log</a>';
+                    }
                     return '';
                 },
                 sortable: false
